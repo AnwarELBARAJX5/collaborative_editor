@@ -1,6 +1,6 @@
 ## Collaborative editor
 
-Projet réseau 2024/2025 L3-info/AMU. 
+Projet applicatiosn réseau L3-info/AMU. 
 
 Edition collaborative de documents texte 
 avec une architecture client/serveur
