@@ -1,6 +1,13 @@
 plugins {
     id 'java'
+    id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+
+application {
+    mainClass = 'amu.editor.GUIClient'
+    mainModule = 'amu.editor'
 }
 
 javafx {
