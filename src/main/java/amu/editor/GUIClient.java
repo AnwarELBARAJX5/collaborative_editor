@@ -15,6 +15,8 @@ public class GUIClient extends javafx.application.Application{
         URL url = getClass().getResource("clientView.fxml");
         System.out.println("URL: " + url);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("clientView.fxml"));
+
+        System.out.println(loader.getCharset());
         Parent root = null;
         try {
             root = loader.load();
@@ -23,7 +25,7 @@ public class GUIClient extends javafx.application.Application{
 
         }
 
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root,300,200);
         primaryStage.setTitle("collaborative editor");
         primaryStage.setScene(scene);
         primaryStage.show();
