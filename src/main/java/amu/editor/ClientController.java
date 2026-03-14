@@ -4,6 +4,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+
 public class ClientController {
 
     @FXML
@@ -39,13 +42,22 @@ public class ClientController {
     @FXML
     private void handleAddLine() {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
+        int insertIndex;
+        String text="(New Line)";
         if (selectedIndex == -1) {
-            listView.getItems().add("(New Line)");
+            insertIndex=listView.getItems().size();
+            listView.getItems().add(text);
         } else {
-            // new line added below selected line
-            listView.getItems().add(selectedIndex+1, "(New Line)");
+            insertIndex=selectedIndex+1;
+            listView.getItems().add(insertIndex, text);
         }
-        //TODO request server to add a new line
+        try(java.net.Socket socket=new java.net.Socket("localhost",1234) ;
+            java.io.DataOutputStream out=new java.io.DataOutputStream(socket.getOutputStream())) {
+                out.writeUTF("ADDL "+insertIndex+ " "+text);
+
+        } catch (java.io.IOException e) {
+            System.out.println("Erreur de communication avec le serveur :"+e.getMessage());
+        }
     }
 
     @FXML
