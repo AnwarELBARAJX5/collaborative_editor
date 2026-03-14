@@ -28,6 +28,7 @@ public class GUIClient extends javafx.application.Application{
         Scene scene = new Scene(root,300,200);
         primaryStage.setTitle("collaborative editor");
         primaryStage.setScene(scene);
+        System.out.println();
         primaryStage.show();
     }
 }

@@ -8,6 +8,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ClientController {
 
@@ -19,6 +21,7 @@ public class ClientController {
             "SECOND WITCH  When the hurly-burly’s done\n",
             "   When the battle’s lost and won.\n",
             "THIRD WITCH  That will be ere the set of sun\n"};
+    public Path curentfile;
 
     @FXML
     private TextField textField;
@@ -114,6 +117,29 @@ public class ClientController {
             throw new IndexOutOfBoundsException("Index trop grand");
         }
     }
+    @FXML
+    private void handleNewFile() {
+        try {
+            curentfile=Gestionfichier.Creation();
+            listView.getItems().clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    @FXML
+    private void handlesendFile() {
+        if (curentfile == null) {
+            System.out.println("Pas de fichier ouvert");
+            return;
+        }
+        try {
+           Gestionfichier.write(curentfile,textSample);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
 
