@@ -1,6 +1,9 @@
 package amu.editor;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -8,6 +11,7 @@ public class ServerCentral {
 
     private static AtomicInteger nombreClients = new AtomicInteger(0);
     private static AtomicInteger nbthread =  new AtomicInteger(5);
+    List<Path> paths = new ArrayList<>();
 
     public static void main(String[] args) {
 
