@@ -4,7 +4,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ClientController {
@@ -64,9 +66,15 @@ public class ClientController {
     private void handleDeleteLine() {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
         if (selectedIndex != -1) {
-            listView.getItems().remove(selectedIndex);
+            try(Socket socket=new Socket("localhost",1234);
+                DataOutputStream out=new DataOutputStream(socket.getOutputStream())){
+                out.writeUTF("DELL "+selectedIndex);
+            } catch (Exception e) {
+                System.out.println("Erreur lors de la suppression :"+e.getMessage());
+            }
+            handleRefresh();
         }
-        // TODO request server to remove line
+
     }
 
     @FXML
