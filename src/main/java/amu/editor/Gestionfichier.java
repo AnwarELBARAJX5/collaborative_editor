@@ -1,7 +1,8 @@
 package amu.editor;
+import javax.security.auth.login.CredentialException;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.Arrays;
+import java.util.*;
 
 public  class Gestionfichier {
 
@@ -25,9 +26,6 @@ public  class Gestionfichier {
         return currentFile;
     }
 
-
-
-
     public static void write(Path path,String[] strings){
         if (strings.length==0) {
             System.out.println("votre document est vide");
@@ -40,5 +38,48 @@ public  class Gestionfichier {
                 System.out.println(e);
             }
         }
+    }
+
+    public static String creation(String chemin, Map<UUID,Path> pathMap) throws IOException {
+        Path file = Paths.get(chemin);
+        Path parent = file.getParent();
+        String docId = null;
+        if (parent != null && !Files.exists(parent)) {
+            Files.createDirectories(parent);
+        }
+        if (!Files.exists(file)) {
+            Files.createFile(file);
+            System.out.println("Nouveau fichier créé : " + file);
+            docId = UUID.randomUUID().toString();
+        } else {
+            return ("Fichier déjà existant : " + file);
+        }
+        return docId;
+    }
+
+    public static String[] addline(int x, String s, String[] ss) {
+        String[] newArray = new String[ss.length + 1];
+        for (int i = 0, j = 0; i < newArray.length; i++) {
+            if (i == x) {
+                newArray[i] = s;
+            } else {
+                newArray[i] = ss[j];
+                j++;
+            }
+        }
+
+        return newArray;
+    }
+    public static String[] deleteline(int x,String[] ss){
+        String[] newArray = new String[ss.length-1];
+        for (int i = 0, j = 0; i < newArray.length; i++) {
+            if (i == x) {
+                //lol
+            } else {
+                newArray[i] = ss[j];
+                j++;
+            }
+        }
+        return newArray;
     }
 }

@@ -3,7 +3,9 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,8 +13,7 @@ public class ServerCentral {
 
     private static AtomicInteger nombreClients = new AtomicInteger(0);
     private static AtomicInteger nbthread =  new AtomicInteger(5);
-    List<Path> paths = new ArrayList<>();
-
+    Map<Path, List<String>> documents= new HashMap<>();
     public static void main(String[] args) {
 
         try (ServerSocket server = new ServerSocket(1234)) {
