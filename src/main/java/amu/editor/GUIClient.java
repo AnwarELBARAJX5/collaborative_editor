@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URL;
 
 public class GUIClient extends javafx.application.Application{
@@ -15,7 +16,6 @@ public class GUIClient extends javafx.application.Application{
         URL url = getClass().getResource("clientView.fxml");
         System.out.println("URL: " + url);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("clientView.fxml"));
-
         System.out.println(loader.getCharset());
         Parent root = null;
         try {

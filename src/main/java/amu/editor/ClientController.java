@@ -29,6 +29,8 @@ public class ClientController {
     @FXML
     private MenuItem deleteLineMenuItem;
 
+    NewClient client;
+
     @FXML
     public void initialize() {
         handleRefresh(); // get last version of the document
@@ -42,10 +44,13 @@ public class ClientController {
                 textField.setText(newValue);
             }
         });
+        client =new NewClient("localhost",1234);
+        System.out.println("socket ouvert");
+
     }
 
     @FXML
-    private void handleAddLine() {
+    private void handleAddLine() throws IOException {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
         int insertIndex;
         String text="(New Line)";
@@ -55,13 +60,7 @@ public class ClientController {
         } else {
             insertIndex=selectedIndex+1;
             listView.getItems().add(insertIndex, text);
-        }
-        try(java.net.Socket socket=new java.net.Socket("localhost",1234) ;
-            java.io.DataOutputStream out=new java.io.DataOutputStream(socket.getOutputStream())) {
-                out.writeUTF("ADDL "+insertIndex+ " "+text);
-
-        } catch (java.io.IOException e) {
-            System.out.println("Erreur de communication avec le serveur :"+e.getMessage());
+            textSample=Gestionfichier.addline(insertIndex,listView.getItems().get(insertIndex),textSample);
         }
     }
 
@@ -69,12 +68,7 @@ public class ClientController {
     private void handleDeleteLine() {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
         if (selectedIndex != -1) {
-            try(Socket socket=new Socket("localhost",1234);
-                DataOutputStream out=new DataOutputStream(socket.getOutputStream())){
-                out.writeUTF("DELL "+selectedIndex);
-            } catch (Exception e) {
-                System.out.println("Erreur lors de la suppression :"+e.getMessage());
-            }
+            textSample=Gestionfichier.deleteline(selectedIndex,textSample);
             handleRefresh();
         }
 
@@ -102,20 +96,11 @@ public class ClientController {
     }
 
     private void update(int index, String string) {
-        if (index < textSample.length) {
-            textSample[index] = string;
-        } else if (index == textSample.length) {
-            String[] newArray = new String[textSample.length + 1];
-
-            for (int i = 0; i < textSample.length; i++) {
-                newArray[i] = textSample[i];
-            }
-
-            newArray[index] = string;
-            textSample = newArray;
-        } else {
-            throw new IndexOutOfBoundsException("Index trop grand");
-        }
+         try {
+             textSample[index] = string;
+         } catch (Exception e) {
+             throw new RuntimeException(e);
+         }
     }
     @FXML
     private void handleNewFile() {
