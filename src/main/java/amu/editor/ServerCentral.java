@@ -27,7 +27,7 @@ public class ServerCentral {
             System.out.println("Erreur de connexion");
         }
     }
-    private static void gererClient(Socket client) {
+    public static void gererClient(Socket client) {
         if (nombreClients.get() == nbthread.get()) {
             System.out.println("nbtotal");
         }
