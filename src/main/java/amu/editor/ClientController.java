@@ -28,24 +28,92 @@ public class ClientController {
     @FXML
     private MenuItem deleteLineMenuItem;
 
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
    // NewClient client;
 
+//    @FXML
+//    public void initialize() {
+//        handleRefresh(); // get last version of the document
+//
+//        // Activate "Delete Line" option when a line is selected
+//        listView.getSelectionModel().selectedItemProperty().addListener((observableValue, string, newValue) -> {
+//            deleteLineMenuItem.setDisable(newValue == null);
+//
+//            // For editing selected line
+//            if (newValue != null) {
+//                textField.setText(newValue);
+//            }
+//        });
+//        //client =new NewClient("localhost",1234);
+//        //System.out.println("socket ouvert");
+//
+//    }
     @FXML
-    public void initialize() {
-        handleRefresh(); // get last version of the document
-
-        // Activate "Delete Line" option when a line is selected
-        listView.getSelectionModel().selectedItemProperty().addListener((observableValue, string, newValue) -> {
-            deleteLineMenuItem.setDisable(newValue == null);
-
-            // For editing selected line
+    public void initialize(){
+        listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 textField.setText(newValue);
+                if (deleteLineMenuItem != null) {
+                    deleteLineMenuItem.setDisable(false);
+                }
             }
         });
-        //client =new NewClient("localhost",1234);
-        //System.out.println("socket ouvert");
+        try{
+            socket=new Socket("localhost",1234);
+            out=new PrintWriter(socket.getOutputStream(),true);
+            in=new BufferedReader(new InputStreamReader((socket.getInputStream())));
+            new Thread(this::ecouterServeur).start();
+            out.println("GETD");
+        }catch(IOException e){e.printStackTrace();}
+    }
+    private void ecouterServeur(){
+        try{
+            String message;
+            while((message=in.readLine())!=null){
+                final String msg=message;
+                javafx.application.Platform.runLater(()->traiterMessageServeur(msg));
+            }
+        }catch (IOException e){System.out.println("Connexion perdue");
 
+        }
+    }
+    private void traiterMessageServeur(String msg) {
+        if (msg.startsWith("LINE 0 ")) {
+            listView.getItems().clear();
+        }
+
+        try {
+            if (msg.startsWith("LINE ")) {
+                String[] parts = msg.split(" ", 3);
+                if (parts.length == 3) {
+                    listView.getItems().add(parts[2]);
+                }
+            }
+            else if (msg.startsWith("ADDL ")) {
+                String[] p = msg.split(" ", 3);
+                int index = Integer.parseInt(p[1]);
+                if (index >= 0 && index <= listView.getItems().size()) {
+                    listView.getItems().add(index, p[2]);
+                }
+            }
+            else if (msg.startsWith("RMVL ")) {
+                int index = Integer.parseInt(msg.split(" ")[1]);
+                if (index >= 0 && index < listView.getItems().size()) {
+                    listView.getItems().remove(index);
+                }
+            }
+            else if (msg.startsWith("MDFL ")) {
+                String[] p = msg.split(" ", 3);
+                int index = Integer.parseInt(p[1]);
+                if (index >= 0 && index < listView.getItems().size()) {
+                    listView.getItems().set(index, p[2]);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erreur lors du traitement du message : " + msg);
+        }
     }
 
     @FXML
@@ -58,26 +126,16 @@ public class ClientController {
         } else {
             insertIndex=selectedIndex+1;
         }
-        try (Socket socket = new Socket("localhost", 1234);
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-            out.println("ADDL " +insertIndex + " " +text);
-        } catch (IOException e) {
-            System.out.println("Erreur(AddLine):" + e.getMessage());
+        if (out != null) {
+            out.println("ADDL " + insertIndex + " (New Line)");
         }
-        handleRefresh();
     }
 
     @FXML
     private void handleDeleteLine() {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
-        if (selectedIndex != -1) {
-            try (Socket socket = new Socket("localhost", 1234);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                out.println("RMVL " + selectedIndex);
-            } catch (IOException e) {
-                System.out.println("Erreur (DeleteLine):" + e.getMessage());
-            }
-            handleRefresh();
+        if (selectedIndex != -1 && out!=null){
+            out.println("RMVL "+selectedIndex);
         }
 
     }
@@ -85,15 +143,9 @@ public class ClientController {
     @FXML
     private void handleTextFieldUpdate() {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
-        if (selectedIndex != -1) {
-            String newText = textField.getText();
-            try (Socket socket = new Socket("localhost", 1234);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                out.println("MDFL " + selectedIndex + " " + newText);
-            } catch (IOException e) {
-                System.out.println("Erreur(UpdateLine):" + e.getMessage());
-            }
-            handleRefresh();
+        if (selectedIndex != -1 && out!=null) {
+            String newText=textField.getText();
+            out.println("MDFL "+selectedIndex+" "+newText);
         }
         }
 
@@ -101,27 +153,7 @@ public class ClientController {
 
     @FXML
     private void  handleRefresh() {
-        try (Socket socket = new Socket("localhost", 1234);
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-            out.println("GETD");
-            listView.getItems().clear();
-            String reponse;
-            while ((reponse = in.readLine()) != null) {
-                if (reponse.startsWith("LINE ")) {
-                    String[] parts = reponse.split(" ", 3);
-                    if (parts.length == 3) {
-                        listView.getItems().add(parts[2]);
-                    } else if (parts.length == 2) {
-                        listView.getItems().add(""); // Cas d'une ligne vide
-                    }
-                } else if (reponse.startsWith("DONE")) {
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Refresh impossible de contacter le serveur");
-        }
+        if (out != null) out.println("GETD");
     }
 
 
