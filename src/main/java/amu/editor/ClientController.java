@@ -65,7 +65,7 @@ public class ClientController {
             out=new PrintWriter(socket.getOutputStream(),true);
             in=new BufferedReader(new InputStreamReader((socket.getInputStream())));
             new Thread(this::ecouterServeur).start();
-            out.println("GETD");
+            out.println("OPEN default.txt");
         }catch(IOException e){e.printStackTrace();}
     }
     private void ecouterServeur(){
@@ -117,7 +117,7 @@ public class ClientController {
     }
 
     @FXML
-    private void handleAddLine() throws IOException {
+    private void handleAddLine()  {
         int selectedIndex = listView.getSelectionModel().getSelectedIndex();
         int insertIndex;
         String text="(New Line)";
@@ -159,8 +159,21 @@ public class ClientController {
 
     @FXML
     private void handleNewFile() {
-        // A faire après
-        System.out.println("Bouton New File cliqué");
+        javafx.scene.control.TextInputDialog dialog=new javafx.scene.control.TextInputDialog("nouveau.txt");
+        dialog.setTitle("Gestion des fichiers");
+        dialog.setHeaderText("Ouvrir ou créer un document");
+        dialog.setContentText("Nom du fichier :");
+        java.util.Optional<String> result=dialog.showAndWait();
+        if (result.isPresent()) {
+            String fileName=result.get();
+            if (fileName!=null && !fileName.trim().isEmpty()){
+                listView.getItems().clear();
+                if (out != null){
+                    out.println("OPEN "+fileName);
+                    System.out.println("Client change pour le fichier:"+fileName);
+                }
+            }
+        }
     }
 
     @FXML

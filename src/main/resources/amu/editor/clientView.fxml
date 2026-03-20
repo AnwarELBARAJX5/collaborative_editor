@@ -22,4 +22,5 @@
 
 <TextField fx:id="textField" promptText="Select a line and  edit here..." onAction="#handleTextFieldUpdate"/>
 <Button fx:id="refreshButton" text="refresh" onAction="#handleRefresh"/> <Button fx:id="cration" text="niewfile" onAction="#handleNewFile"/> <Button fx:id="sendit" text="send" onAction="#handlesendFile"/>
+    <Button text="Add Line" onAction="#handleAddLine" />
 </VBox>
