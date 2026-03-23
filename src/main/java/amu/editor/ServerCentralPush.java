@@ -43,16 +43,14 @@ public class ServerCentralPush implements ServersInterface{
     int portLocal=1234;
     int portDistant=-1;
     if(args.length>=1)portLocal=Integer.parseInt(args[0]);
-    if(args.length>=2)portDistant=Integer.parseInt(args[1]);
+    List<Integer> listePorts=new ArrayList<>();
+    for(int i=1;i<args.length;i++)listePorts.add(Integer.parseInt(args[i]));
         List<String> defaut = Collections.synchronizedList(new ArrayList<>());
         defaut.add("Bienvenue sur le Serveur Fédéré (Port " + portLocal + ")");
         documents.put("default.txt", defaut);
-
         ServerCentralPush monServeur = new ServerCentralPush(portLocal);
-        if (portDistant != -1) {
-            List<Integer> listePorts = new ArrayList<>();
-            listePorts.add(portDistant);
-            Servers federation = new Servers(listePorts, portLocal);
+        if (!listePorts.isEmpty()) {
+            Servers federation=new Servers(listePorts,portLocal);
             federation.connextionAll();
         }
 

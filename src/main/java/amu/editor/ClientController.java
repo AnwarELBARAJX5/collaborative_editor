@@ -60,8 +60,17 @@ public class ClientController {
                 }
             }
         });
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("1234");
+        dialog.setTitle("Choix du Serveur");
+        dialog.setHeaderText("A quel serveur voulez-vous vous connecter?");
+        dialog.setContentText("Port:");
+        int portServeur = 1234;
+        java.util.Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            portServeur = Integer.parseInt(result.get());
+        }
         try{
-            socket=new Socket("localhost",1234);
+            socket=new Socket("localhost",portServeur);
             out=new PrintWriter(socket.getOutputStream(),true);
             in=new BufferedReader(new InputStreamReader((socket.getInputStream())));
             new Thread(this::ecouterServeur).start();
