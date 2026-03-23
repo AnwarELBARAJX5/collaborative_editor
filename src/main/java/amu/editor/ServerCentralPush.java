@@ -13,25 +13,64 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class ServerCentralPush {
+public class ServerCentralPush implements ServersInterface{
 //    private static List<String> documentPartage = Collections.synchronizedList(new ArrayList<>());
     private static Map<String, List<String>> documents = new ConcurrentHashMap<>();
 //    private static List<PrintWriter> clients=Collections.synchronizedList(new ArrayList<>());
     private static Map<PrintWriter, String> clients = new ConcurrentHashMap<>();
-    public static void main(String[] args){
-        List<String> defaut = Collections.synchronizedList(new ArrayList<>());
-        defaut.add("Bienvenue dans l'éditeur collaboratif");
-        defaut.add("Fichier : default.txt");
-        documents.put("default.txt", defaut);
-        try(ServerSocket server=new ServerSocket(1234)){
-            System.out.println("Serveur Multi fichiers démarré sur 1234");
-            while(true){
-                Socket s=server.accept();
-                new Thread(()->gererClient(s)).start();
-            }
-        }catch (IOException e){e.printStackTrace();}
+    private int port;
+    public ServerCentralPush(int port){
+        this.port=port;
     }
-    private static void gererClient(Socket socket) {
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    public static void main(String[] args){
+//        List<String> defaut = Collections.synchronizedList(new ArrayList<>());
+//        defaut.add("Bienvenue dans l'éditeur collaboratif");
+//        defaut.add("Fichier : default.txt");
+//        documents.put("default.txt", defaut);
+//        try(ServerSocket server=new ServerSocket(1234)){
+//            System.out.println("Serveur Multi fichiers démarré sur 1234");
+//            while(true){
+//                Socket s=server.accept();
+//                new Thread(()->gererClient(s)).start();
+//            }
+//        }catch (IOException e){e.printStackTrace();}
+//
+    int portLocal=1234;
+    int portDistant=-1;
+    if(args.length>=1)portLocal=Integer.parseInt(args[0]);
+    if(args.length>=2)portDistant=Integer.parseInt(args[1]);
+        List<String> defaut = Collections.synchronizedList(new ArrayList<>());
+        defaut.add("Bienvenue sur le Serveur Fédéré (Port " + portLocal + ")");
+        documents.put("default.txt", defaut);
+
+        ServerCentralPush monServeur = new ServerCentralPush(portLocal);
+        if (portDistant != -1) {
+            List<Integer> listePorts = new ArrayList<>();
+            listePorts.add(portDistant);
+            Servers federation = new Servers(listePorts, portLocal);
+            federation.connextionAll();
+        }
+
+        // Lancement de notre propre serveur
+        try (ServerSocket server = new ServerSocket(portLocal)) {
+            System.out.println("🚀 Serveur démarré sur le port " + portLocal);
+            while (true) {
+                Socket s = server.accept();
+                new Thread(() -> monServeur.gererClient(s)).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public  void gererClient(Socket socket) {
         PrintWriter out=null;
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter outFinal = new PrintWriter(socket.getOutputStream(), true)) {
@@ -97,5 +136,27 @@ public class ServerCentralPush {
             }
         }
     }
+    public static void traiterCommandeFederation(String fileName,String cmd){
+        traiterCommande(fileName,cmd);
+        diffuser(fileName,cmd);
+    }
+//    public static void connecterAutreServeur(String ip,int portAutreServeur) {
+//        new Thread(() -> {
+//            try {
+//                Socket socketVersAutre = new Socket(ip, portAutreServeur);
+//                System.out.println("Connecté au serveur fédéré sur le port" + portAutreServeur);
+//                BufferedReader in = new BufferedReader(new InputStreamReader(socketVersAutre.getInputStream()));
+//                PrintWriter out = new PrintWriter(socketVersAutre.getOutputStream(), true);
+//                clients.put(out, "default.txt");
+//                String requeteDuServeur;
+//                while ((requeteDuServeur = in.readLine()) != null) {
+//                    System.out.println("Reçu de l'autre serveur")
+//                }
+//            }
+//
+//
+//        })
+//    }
+
 
 }

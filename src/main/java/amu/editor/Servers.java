@@ -1,43 +1,41 @@
 package amu.editor;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.List;
 
 public class Servers {
-List<ServersInterface> serversInterfaceList;
+List<Integer> portsDistants;
 int myPort;
-public Servers(List<ServersInterface> serversInterfaceList, int myPort){
-    this.serversInterfaceList = serversInterfaceList;
+public Servers(List<Integer> portsDistants, int myPort){
+    this.portsDistants = portsDistants;
     this.myPort = myPort;
 }
-    public void connect(ServersInterface b) {
+    public void connect(int portCible) {
         try (
-                Socket socket = new Socket("localhost", b.getPort());
-                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                DataInputStream in = new DataInputStream(socket.getInputStream())
+                Socket socket = new Socket("localhost", portCible);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         ) {
-            while (true) {
-                out.writeUTF("Request from server");
-                String response = in.readUTF();
-                System.out.println("Response from " + b.getPort() + ": " + response);
-
-                Thread.sleep(1000);
+            System.out.println("Connecté au serveur fédéré sur le port "+portCible);
+            out.println("OPEN default.txt");
+            String requeteDuServeur;
+            while ((requeteDuServeur=in.readLine())!=null){
+                System.out.println("Reçu du serveur " + portCible + " : " + requeteDuServeur);if (requeteDuServeur.startsWith("ADDL") || requeteDuServeur.startsWith("RMVL") || requeteDuServeur.startsWith("MDFL")) {
+                    ServerCentralPush.traiterCommandeFederation("default.txt", requeteDuServeur);
+                }
             }
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Connexion arrêtée avec le serveur " + b.getPort());
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Connexion arrêtée avec le serveur " +portCible);
         }
     }
 
     public void connextionAll(){
-          for(ServersInterface ser: serversInterfaceList){
-              ServersInterface target = ser;
+          for(int portCible: portsDistants){
               new Thread(()->{
-                  if(target.getPort() !=myPort)
-                        connect(target);
+                  if(portCible !=myPort)
+                        connect(portCible);
               }) .start();
           }
 
