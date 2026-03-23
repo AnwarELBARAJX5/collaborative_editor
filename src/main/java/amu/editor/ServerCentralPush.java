@@ -1,9 +1,6 @@
 package amu.editor;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,8 +16,35 @@ public class ServerCentralPush implements ServersInterface{
 //    private static List<PrintWriter> clients=Collections.synchronizedList(new ArrayList<>());
     private static Map<PrintWriter, String> clients = new ConcurrentHashMap<>();
     private int port;
+    private static boolean isMaster=false;
+    private static PrintWriter outToMaster=null;
+    private static List<PrintWriter> peersConnectes=Collections.synchronizedList(new ArrayList<>());
     public ServerCentralPush(int port){
         this.port=port;
+        String masterIp="localhost";
+        int masterPort=1234;
+        try(BufferedReader br=new BufferedReader(new FileReader("peers.cfg"))){
+            String line;
+            while((line=br.readLine())!=null){
+                if(line.trim().startsWith("master")){
+                    String[] parts = line.split("=");
+                    String[] addr = parts[1].trim().split(" ");
+                    masterIp = addr[0];
+                    masterPort = Integer.parseInt(addr[1]);
+                }
+            }
+            System.out.println("Ficher peers.cfg lu");
+        } catch (IOException e) {
+            System.out.println("Fichier de configuration peers.cfg introuvable,donc localhost 1234 est le maitre par défaut");
+        }
+        if(this.port==masterPort){
+            isMaster=true;
+            System.out.println("Je suis le serveur master sur le port "+this.port);
+        }else{
+            System.out.println("Je suis pas maitre sur le port "+this.port);
+            connecterAuMaster(masterIp,masterPort);
+        }
+
     }
     @Override
     public int getPort() {
@@ -41,18 +65,11 @@ public class ServerCentralPush implements ServersInterface{
 //        }catch (IOException e){e.printStackTrace();}
 //
     int portLocal=1234;
-    int portDistant=-1;
-    if(args.length>=1)portLocal=Integer.parseInt(args[0]);
-    List<Integer> listePorts=new ArrayList<>();
-    for(int i=1;i<args.length;i++)listePorts.add(Integer.parseInt(args[i]));
-        List<String> defaut = Collections.synchronizedList(new ArrayList<>());
-        defaut.add("Bienvenue sur le Serveur Fédéré (Port " + portLocal + ")");
-        documents.put("default.txt", defaut);
-        ServerCentralPush monServeur = new ServerCentralPush(portLocal);
-        if (!listePorts.isEmpty()) {
-            Servers federation=new Servers(listePorts,portLocal);
-            federation.connextionAll();
-        }
+    if(args.length >= 1)portLocal=Integer.parseInt(args[0]);
+    List<String> defaut=Collections.synchronizedList(new ArrayList<>());
+    defaut.add("Bienvenue sur le serveur fédéré (Port "+portLocal+")");
+    documents.put("default.txt",defaut);
+    ServerCentralPush monServeur=new ServerCentralPush(portLocal);
 
         // Lancement de notre propre serveur
         try (ServerSocket server = new ServerSocket(portLocal)) {
@@ -76,7 +93,22 @@ public class ServerCentralPush implements ServersInterface{
             String requete;
             while ((requete = in.readLine()) != null) {
                 System.out.println("Reçue : " + requete);
+                if (requete.equals("IAMPEER")) {
+                    if (isMaster) peersConnectes.add(outFinal);
+                    continue;
+                }
+                if (requete.startsWith("FORWARD ")){
+                    if (isMaster){
+                        String[] parts=requete.split(" ", 3);
+                        String fileName=parts[1];
+                        String cmd=parts[2];
 
+                        traiterCommande(fileName, cmd);
+                        diffuser(fileName,cmd); // À nos clients directs
+                        diffuserAuxPeers(fileName, cmd); // Aux autres esclaves
+                    }
+                    continue;
+                }
                 if (requete.startsWith("OPEN ")) {
                     String fileName = requete.split(" ", 2)[1];
                     // On enregistre que ce client travaille sur ce fichier
@@ -87,15 +119,22 @@ public class ServerCentralPush implements ServersInterface{
                 else if (requete.startsWith("ADDL ") || requete.startsWith("RMVL ") || requete.startsWith("MDFL ")) {
                     String fileName = clients.get(outFinal);
                     if (fileName != null) {
-                        traiterCommande(fileName, requete);
-                        diffuser(fileName, requete);
+                        if(isMaster) {
+                            traiterCommande(fileName, requete);
+                            diffuser(fileName, requete);
+                            diffuserAuxPeers(fileName,requete);
+                        }else{
+                            if(outToMaster!=null){
+                                outToMaster.println("FORWARD "+fileName+" "+requete);
+                            }
+                        }
                     }
                 }
             }
         } catch (IOException e) {
-            System.out.println("Un client s'est déconnecté.");
+            System.out.println("Un client ou un serveur s'est déconnecté.");
         } finally {
-            if (out != null) clients.remove(out);
+            if(out != null) {clients.remove(out);peersConnectes.remove(out);}
         }
     }
 
@@ -137,6 +176,36 @@ public class ServerCentralPush implements ServersInterface{
     public static void traiterCommandeFederation(String fileName,String cmd){
         traiterCommande(fileName,cmd);
         diffuser(fileName,cmd);
+    }
+    private static void diffuserAuxPeers(String fileName,String cmd){
+        String syncMsg="SYNC "+fileName+" "+cmd;
+        for (PrintWriter peerOut : peersConnectes) {
+            peerOut.println(syncMsg);
+        }
+    }
+    public static void connecterAuMaster(String ip,int port){
+        new Thread(()->{
+            try {
+                Socket socket = new Socket(ip, port);
+                outToMaster = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                outToMaster.println("IAMPEER");
+                System.out.println("Connecté au serveur master");
+                String message;
+                while ((message = in.readLine()) != null) {
+                    if (message.startsWith("SYNC ")) {
+                        String[] parts = message.split(" ", 3);
+                        if (parts.length == 3) {
+                            String fileName = parts[1];
+                            String commande = parts[2];
+                            traiterCommande(fileName, commande);
+                            diffuser(fileName, commande);
+                        }
+                    }
+                }
+
+            }catch (IOException e){System.out.println("perte de connexion avec le master");}
+        }).start();
     }
 //    public static void connecterAutreServeur(String ip,int portAutreServeur) {
 //        new Thread(() -> {
