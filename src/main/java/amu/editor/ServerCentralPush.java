@@ -139,7 +139,9 @@ public class ServerCentralPush implements ServersInterface{
     }
 
     private static void traiterCommande(String fileName,String cmd) {
+        documents.putIfAbsent(fileName, Collections.synchronizedList(new ArrayList<>()));
         List<String> doc=documents.get(fileName);
+
         synchronized (doc) {
             try {
                 if (cmd.startsWith("ADDL ")) {
