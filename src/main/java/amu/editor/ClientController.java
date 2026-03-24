@@ -60,22 +60,32 @@ public class ClientController {
                 }
             }
         });
-        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("1234");
-        dialog.setTitle("Choix du Serveur");
-        dialog.setHeaderText("A quel serveur voulez-vous vous connecter?");
-        dialog.setContentText("Port:");
-        int portServeur = 1234;
-        java.util.Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            portServeur = Integer.parseInt(result.get());
-        }
+
         try{
-            socket=new Socket("localhost",portServeur);
-            out=new PrintWriter(socket.getOutputStream(),true);
-            in=new BufferedReader(new InputStreamReader((socket.getInputStream())));
+            System.out.println("Demande d'un serveur au Dispatcher...");
+            Socket dispatchSocket = new Socket("localhost", 1233);
+            BufferedReader dispatchIn = new BufferedReader(new InputStreamReader(dispatchSocket.getInputStream()));
+
+            String reponseDispatch = dispatchIn.readLine();
+            System.out.println("Reçu du Dispatcher: "+reponseDispatch);
+            dispatchSocket.close();
+            int portCible = 1234;
+            if (reponseDispatch!=null&&reponseDispatch.startsWith("REDIRECT ")){
+                String[] parts=reponseDispatch.split(" ");
+                portCible=Integer.parseInt(parts[2]);
+            }
+            System.out.println("🚀 Connexion finale au serveur sur le port : " + portCible);
+            socket = new Socket("localhost", portCible);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader((socket.getInputStream())));
+
             new Thread(this::ecouterServeur).start();
             out.println("OPEN default.txt");
-        }catch(IOException e){e.printStackTrace();}
+
+        } catch(IOException e){
+            System.out.println("Impossible de se connecter au Dispatcher sur le port 1233.");
+            e.printStackTrace();
+        }
     }
     private void ecouterServeur(){
         try{

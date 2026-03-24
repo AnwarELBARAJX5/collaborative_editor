@@ -17,7 +17,7 @@ public class ServerDispatch {
         try(BufferedReader br=new BufferedReader(new FileReader("peers.cfg"))){
             String line;
             while((line=br.readLine())!=null){
-                if(line.trim().startsWith("master")||line.trim().startsWith("peers")){
+                if(line.trim().startsWith("master")||line.trim().startsWith("peer")){
                     String[] parts = line.split("=");
                     String[] addr = parts[1].trim().split(" ");
                     portsServeurs.add(Integer.parseInt(addr[1]));
