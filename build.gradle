@@ -32,3 +32,31 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+task runServers(dependsOn: 'classes'){
+    group ='application'
+    description ='Lance le Dispatcher et tous les serveurs définis dans peers.cfg'
+
+    doLast {
+        println "Lancement du ServerDispatch (Port 1233)..."
+        "cmd /c start \"ServerDispatch\" java -cp build/classes/java/main amu.editor.ServerDispatch".execute()
+
+        println "Lecture du fichier peers.cfg..."
+        def peersFile = file('peers.cfg')
+
+        if (peersFile.exists()) {
+            peersFile.eachLine { line ->
+                if (line.trim().startsWith("master") || line.trim().startsWith("peer")) {
+                    def parts = line.split("=")
+                    def addr = parts[1].trim().split(" ")
+                    def port = addr[1]
+
+                    println "➡️ Démarrage d'un serveur sur le port ${port}..."
+                    "cmd /c start \"Serveur ${port}\" java -cp build/classes/java/main amu.editor.ServerCentralPush ${port}".execute()
+                }
+            }
+            println "Tous les serveurs sont lancés dans de nouvelles fenêtres!"
+        } else {
+            println "Erreur:Fichier peers.cfg introuvable à la racine du projet."
+        }
+    }
+}
