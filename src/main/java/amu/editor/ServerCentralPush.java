@@ -40,6 +40,7 @@ public class ServerCentralPush implements ServersInterface{
         if(this.port==masterPort){
             isMaster=true;
             System.out.println("Je suis le serveur master sur le port "+this.port);
+            /*
             new Thread(() -> {
                 try {
                     long startTime = System.currentTimeMillis();
@@ -51,16 +52,18 @@ public class ServerCentralPush implements ServersInterface{
 
                         System.out.println("SIMULATION PANNE:Le Maître se fige pour 5s...");
                         Thread.sleep(5000);  // Le Thread fige le processus pendant 5s
-                        System.out.println("✅ Le Maître se réveille.");
+                        System.out.println("Le Maître se réveille.");
                     }
 
-                    System.out.println("ARRÊT DÉFINITIF:Le Maître s'autodétruit !");
+                    System.out.println("ARRÊT DÉFINITIF:Le Maître s'autodétrui");
                     System.exit(1);
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }).start();
+
+             */
         }else{
             System.out.println("Je suis pas maitre sur le port "+this.port);
             connecterAuMaster(masterIp,masterPort);
