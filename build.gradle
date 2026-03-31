@@ -32,7 +32,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-task runServers(dependsOn: 'classes'){
+task runServers(dependsOn: ['classes', 'killOldServers']){
     group ='application'
     description ='Lance le Dispatcher et tous les serveurs définis dans peers.cfg'
 
@@ -57,6 +57,20 @@ task runServers(dependsOn: 'classes'){
             println "Tous les serveurs sont lancés dans de nouvelles fenêtres!"
         } else {
             println "Erreur:Fichier peers.cfg introuvable à la racine du projet."
+        }
+    }
+}
+task killOldServers {
+    group = 'application'
+    description = 'Ferme les anciennes fenêtres des serveurs'
+    doLast {
+        println "🧹 Nettoyage des anciens serveurs..."
+        try {
+            // Demande à Windows de forcer (/F) la fermeture de toute l'arborescence (/T) des fenêtres nommées "Serveur*" et "ServerDispatch*"
+            "cmd /c taskkill /F /T /FI \"WINDOWTITLE eq Serveur*\"".execute().waitFor()
+            "cmd /c taskkill /F /T /FI \"WINDOWTITLE eq ServerDispatch*\"".execute().waitFor()
+        } catch (Exception e) {
+            // Ignore s'il n'y a pas de fenêtre à fermer
         }
     }
 }

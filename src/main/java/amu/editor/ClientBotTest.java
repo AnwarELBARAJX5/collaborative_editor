@@ -10,7 +10,7 @@ import java.net.Socket;
 public class ClientBotTest {
     public static void main(String[] args){
         int nombreDeMessages=1000;
-        int nbBots=1000;
+        int nbBots=10;
         for (int b = 1; b <=nbBots; b++) {
             final int botId = b;
             // On lance chaque bot dans un Thread séparé pour qu'ils attaquent en même temps
