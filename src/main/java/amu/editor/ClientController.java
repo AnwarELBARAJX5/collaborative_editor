@@ -197,8 +197,21 @@ public class ClientController {
 
     @FXML
     private void handlesendFile() {
-        //A faire après
-        System.out.println("Bouton Send File cliqué");
+        java.util.List<String> lignes=listView.getItems();
+        String[] contenu=lignes.toArray(new  String[0]);
+        java.nio.file.Path nouveauFichier=Gestionfichier.Creation();
+        if(nouveauFichier!=null){
+            Gestionfichier.write(nouveauFichier,contenu);
+            System.out.println("Fichier sauvegardé avec succès :"+nouveauFichier.toString());
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                alert.setTitle("Sauvegarde réussie");
+                alert.setHeaderText("Fichier enregistré");
+                alert.setContentText("Le document a été sauvegardé avec succès sur votre ordinateur sous:\n" + nouveauFichier.toString());
+                alert.showAndWait();
+            });
+        }
+
     }
 
 
