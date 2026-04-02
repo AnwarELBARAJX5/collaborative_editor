@@ -21,22 +21,9 @@ public class ServerCentralPush implements ServersInterface{
     private static List<PrintWriter> peersConnectes=Collections.synchronizedList(new ArrayList<>());
     public ServerCentralPush(int port){
         this.port=port;
-        String masterIp="localhost";
-        int masterPort=1234;
-        try(BufferedReader br=new BufferedReader(new FileReader("peers.cfg"))){
-            String line;
-            while((line=br.readLine())!=null){
-                if(line.trim().startsWith("master")){
-                    String[] parts = line.split("=");
-                    String[] addr = parts[1].trim().split(" ");
-                    masterIp = addr[0];
-                    masterPort = Integer.parseInt(addr[1]);
-                }
-            }
-            System.out.println("Ficher peers.cfg lu");
-        } catch (IOException e) {
-            System.out.println("Fichier de configuration peers.cfg introuvable,donc localhost 1234 est le maitre par défaut");
-        }
+        String masterIp = ConfigUtils.getMasterIp();
+        int masterPort = ConfigUtils.getMasterPort();
+        System.out.println("Fichier peers.cfg lu pour trouver le Maître.");
         if(this.port==masterPort){
             isMaster=true;
             System.out.println("Je suis le serveur master sur le port "+this.port);
@@ -135,7 +122,6 @@ public class ServerCentralPush implements ServersInterface{
                 }
                 if (requete.startsWith("OPEN ")) {
                     String fileName = requete.split(" ", 2)[1];
-                    // On enregistre que ce client travaille sur ce fichier
                     clients.put(outFinal, fileName);
                     documents.putIfAbsent(fileName, Collections.synchronizedList(new ArrayList<>()));
                     envoyerDocument(outFinal, fileName);
