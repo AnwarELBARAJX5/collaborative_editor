@@ -11,7 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class ClientController {
-
+    private static final String SERVER_IP = "localhost";
+    private static final int DISPATCH_PORT = 1233;
     @FXML
     private ListView<String> listView;
 
@@ -46,7 +47,7 @@ public class ClientController {
 //                textField.setText(newValue);
 //            }
 //        });
-//        //client =new NewClient("localhost",1234);
+//        //client =new NewClient(SERVER_IP,1234);
 //        //System.out.println("socket ouvert");
 //
 //    }
@@ -63,19 +64,19 @@ public class ClientController {
 
         try{
             System.out.println("Demande d'un serveur au Dispatcher...");
-            Socket dispatchSocket = new Socket("localhost", 1233);
+            Socket dispatchSocket = new Socket(SERVER_IP, DISPATCH_PORT);
             BufferedReader dispatchIn = new BufferedReader(new InputStreamReader(dispatchSocket.getInputStream()));
 
             String reponseDispatch = dispatchIn.readLine();
             System.out.println("Reçu du Dispatcher: "+reponseDispatch);
             dispatchSocket.close();
-            int portCible = 1234;
+            int portCible = ConfigUtils.getMasterPort();
             if (reponseDispatch!=null&&reponseDispatch.startsWith("REDIRECT ")){
                 String[] parts=reponseDispatch.split(" ");
                 portCible=Integer.parseInt(parts[2]);
             }
             System.out.println("🚀 Connexion finale au serveur sur le port : " + portCible);
-            socket = new Socket("localhost", portCible);
+            socket = new Socket(SERVER_IP, portCible);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader((socket.getInputStream())));
 

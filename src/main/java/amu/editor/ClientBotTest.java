@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientBotTest {
+    private static final String SERVER_IP = "localhost";
+    private static final int DISPATCH_PORT = 1233;
     public static void main(String[] args){
         int nombreDeMessages=1000;
         int nbBots=10;
@@ -20,16 +22,16 @@ public class ClientBotTest {
 
     public static void lancerUnBot(int id,int nombreDeMessages){
         try{
-            Socket dispatchSocket=new Socket("localhost",1233);
+            Socket dispatchSocket=new Socket(SERVER_IP,DISPATCH_PORT);
             BufferedReader dispatchIn=new BufferedReader(new InputStreamReader(dispatchSocket.getInputStream()));
             String reponseDispatch=dispatchIn.readLine();
             dispatchSocket.close();
-            int portCible=1234;
+            int portCible=ConfigUtils.getMasterPort();
             if (reponseDispatch != null && reponseDispatch.startsWith("REDIRECT ")) {
                 portCible = Integer.parseInt(reponseDispatch.split(" ")[2]);
             }
             System.out.println("Bot connecté au port "+portCible);
-            Socket socket=new Socket("localhost",portCible);
+            Socket socket=new Socket(SERVER_IP,portCible);
             PrintWriter out=new PrintWriter(socket.getOutputStream(),true);
             BufferedReader in=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out.println("OPEN stress_test.txt");
@@ -44,11 +46,14 @@ public class ClientBotTest {
             double latence=(double)durationMs/nombreDeMessages;
             System.out.println("Test terminé");
             System.out.println("temps total "+durationMs+"ms");
-            System.out.println("débit ="+String.format("%.2f",debit)+"operations/secondes");
-            System.out.println("Latence par message : "+String.format("%.4f",latence)+" ms");
+            System.out.println("débit="+String.format("%.2f",debit)+"operations/secondes");
+            System.out.println("Latence par message:"+String.format("%.4f",latence)+" ms");
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("Thread du bot arrété");
+            }
             socket.close();
         }catch (IOException e){
             e.printStackTrace();

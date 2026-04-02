@@ -14,20 +14,9 @@ public class ServerDispatch {
     private static int indexTour=0;
     public static void main(String[] args){
         int portDispatch=1233;
-        try(BufferedReader br=new BufferedReader(new FileReader("peers.cfg"))){
-            String line;
-            while((line=br.readLine())!=null){
-                if(line.trim().startsWith("master")||line.trim().startsWith("peer")){
-                    String[] parts = line.split("=");
-                    String[] addr = parts[1].trim().split(" ");
-                    portsServeurs.add(Integer.parseInt(addr[1]));
-                }
-            }
-            System.out.println("Ficher peers.cfg lu par le dispatch "+portsServeurs.size()+" serveurs trouvés.");
-        } catch (IOException e) {
-            System.out.println("Fichier de configuration peers.cfg introuvable,");
-            return;
-        }
+        // Lecture centralisée
+        portsServeurs = ConfigUtils.getAllPorts();
+        System.out.println("Fichier peers.cfg lu par le dispatch, " + portsServeurs.size() + " serveurs trouvés.");
         if(portsServeurs.isEmpty()){
             System.out.println("Aucun serveur configuré");
             return;
