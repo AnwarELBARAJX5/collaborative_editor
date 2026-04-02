@@ -13,14 +13,11 @@ import java.nio.file.Path;
 public class ClientController {
     private static final String SERVER_IP = "localhost";
     private static final int DISPATCH_PORT = 1233;
+    private String name="Anonyme";
     @FXML
     private ListView<String> listView;
 
-//    String[] textSample = { "FIRST WITCH  When shall we three meet again?\n",
-//            "   In thunder, lightning, or in rain?\n",
-//            "SECOND WITCH  When the hurly-burly’s done\n",
-//            "   When the battle’s lost and won.\n",
-//            "THIRD WITCH  That will be ere the set of sun\n"};
+
     public Path curentfile;
 
     @FXML
@@ -53,6 +50,17 @@ public class ClientController {
 //    }
     @FXML
     public void initialize(){
+        javafx.application.Platform.runLater(()->{
+            javafx.scene.control.TextInputDialog dialog=new javafx.scene.control.TextInputDialog("Anonyme");
+            dialog.setTitle("Identification");
+            dialog.setHeaderText("Bienvenue dans l'éditeur KULEBAR");
+            dialog.setContentText("Entrez votre nom:");
+            java.util.Optional<String> result=dialog.showAndWait();
+            result.ifPresent(name-> {
+                this.name=name;
+            });
+
+        });
         listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 textField.setText(newValue);
@@ -131,8 +139,9 @@ public class ClientController {
                     listView.getItems().set(index, p[2]);
                 }
             }
+            listView.scrollTo(listView.getItems().size() - 1);
         } catch (Exception e) {
-            System.out.println("Erreur lors du traitement du message : " + msg);
+            System.out.println("Erreur lors du traitement du message: " + msg);
         }
     }
 
@@ -147,7 +156,7 @@ public class ClientController {
             insertIndex=selectedIndex+1;
         }
         if (out != null) {
-            out.println("ADDL " + insertIndex + " (New Line)");
+            out.println("ADDL " + insertIndex + "["+name+"] Nouvelle ligne");
         }
     }
 
