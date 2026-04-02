@@ -82,4 +82,16 @@ public  class Gestionfichier {
         }
         return newArray;
     }
+    public static void sauvegarderFichierServeur(String fileName,List<String> lignes){
+        try{java.nio.file.Path file=java.nio.file.Paths.get("Serveur_autosave_text");
+        if(!java.nio.file.Files.exists(file)){
+            java.nio.file.Files.createDirectories(file);
+        }
+        java.nio.file.Path fichier=file.resolve(file);
+        java.nio.file.Files.write(fichier,lignes);
+
+    }catch(IOException e){
+            System.out.println("Erreur lors de la sauvegarde coté serveur:"+e.getMessage());
+    }
+    }
 }

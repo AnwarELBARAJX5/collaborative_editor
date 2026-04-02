@@ -169,6 +169,7 @@ public class ServerCentralPush implements ServersInterface{
                     doc.set(Integer.parseInt(p[1]), p[2]);
                 }
             } catch (Exception e) { System.out.println("Commande malformée : " + cmd); }
+            Gestionfichier.sauvegarderFichierServeur(fileName, doc);
         }
     }
 
