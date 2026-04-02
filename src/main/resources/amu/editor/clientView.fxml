@@ -22,6 +22,6 @@
 </ListView>
 
 <TextField fx:id="textField" promptText="Select a line and  edit here..." onAction="#handleTextFieldUpdate"/>
-<Button fx:id="refresh Button" text="Refresh" onAction="#handleRefresh"/> <Button fx:id="cration" text="New file" onAction="#handleNewFile"/> <Button fx:id="sendit" text="send" onAction="#handlesendFile"/>
+<Button fx:id="refreshButton" text="Refresh" onAction="#handleRefresh"/> <Button fx:id="creation" text="New file" onAction="#handleNewFile"/> <Button fx:id="sendit" text="send" onAction="#handlesendFile"/>
     <Button text="Add Line" onAction="#handleAddLine" />
 </VBox>

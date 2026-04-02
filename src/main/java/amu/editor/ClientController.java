@@ -71,7 +71,7 @@ public class ClientController {
         });
 
         try{
-            System.out.println("Demande d'un serveur au Dispatcher...");
+            System.out.println("Demande d'un serveur au Dispatcher");
             Socket dispatchSocket = new Socket(SERVER_IP, DISPATCH_PORT);
             BufferedReader dispatchIn = new BufferedReader(new InputStreamReader(dispatchSocket.getInputStream()));
 
@@ -83,7 +83,7 @@ public class ClientController {
                 String[] parts=reponseDispatch.split(" ");
                 portCible=Integer.parseInt(parts[2]);
             }
-            System.out.println("🚀 Connexion finale au serveur sur le port : " + portCible);
+            System.out.println("Connexion finale au serveur sur le port : " + portCible);
             socket = new Socket(SERVER_IP, portCible);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader((socket.getInputStream())));
@@ -156,8 +156,7 @@ public class ClientController {
             insertIndex=selectedIndex+1;
         }
         if (out != null) {
-            out.println("ADDL " + insertIndex + "["+name+"] Nouvelle ligne");
-        }
+            out.println("ADDL " + insertIndex + " Nouvelle ligne");        }
     }
 
     @FXML
