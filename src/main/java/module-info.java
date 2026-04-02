@@ -6,4 +6,6 @@ module amu.editor {
 
     opens amu.editor to javafx.fxml;
     exports amu.editor;
+    exports amu.old;
+    opens amu.old to javafx.fxml;
 }

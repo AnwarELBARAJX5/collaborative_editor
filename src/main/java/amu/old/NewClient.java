@@ -1,9 +1,8 @@
-package amu.editor;
+package amu.old;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;

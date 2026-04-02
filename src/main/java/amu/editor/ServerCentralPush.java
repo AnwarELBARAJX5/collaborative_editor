@@ -139,6 +139,11 @@ public class ServerCentralPush implements ServersInterface{
                     clients.put(outFinal, fileName);
                     documents.putIfAbsent(fileName, Collections.synchronizedList(new ArrayList<>()));
                     envoyerDocument(outFinal, fileName);
+                }else if (requete.equals("GETD")) {
+                    String fileName = clients.get(outFinal);
+                    if (fileName != null) {
+                        envoyerDocument(outFinal, fileName); // Renvoie tout le document
+                    }
                 }
                 else if (requete.startsWith("ADDL ") || requete.startsWith("RMVL ") || requete.startsWith("MDFL ")) {
                     String fileName = clients.get(outFinal);

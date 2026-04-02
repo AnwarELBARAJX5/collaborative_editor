@@ -1,7 +1,6 @@
-package amu.editor;
+package amu.old;
 import java.io.*;
 import java.net.*;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
