@@ -23,7 +23,7 @@ Lancer un client (Interface Graphique) :
 
 Ouvrez un nouveau terminal et tapez :
 
-`.\\gradlew.bat run`
+\gradlew.bat run
 
 (Répétez cette commande dans plusieurs terminaux pour ouvrir plusieurs clients et tester la collaboration)
 
@@ -31,7 +31,7 @@ Ouvrez un nouveau terminal et tapez :
 
 Lancer les tests de charge (Bots) :
 
-`.\\gradlew.bat runBots`
+\gradlew.bat runBots
 
 
 
@@ -41,7 +41,7 @@ Nous avons programmé une tâche pour forcer la fermeture des serveurs fantômes
 
 Pour nettoyer l'environnement manuellement, tapez :
 
-`.\\gradlew.bat killOldServers`
+\gradlew.bat killOldServers
 
 
 

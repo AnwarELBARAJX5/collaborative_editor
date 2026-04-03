@@ -72,3 +72,9 @@ task killOldServers {
         }
     }
 }
+task runBots(type: JavaExec) {
+    group = 'application'
+    description = 'Lance les tests de charge avec ClientBotTest'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'amu.editor.ClientBotTest'
+}

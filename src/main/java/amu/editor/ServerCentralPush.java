@@ -84,7 +84,7 @@ public class ServerCentralPush implements ServersInterface{
 
         // Lancement de notre propre serveur
         try (ServerSocket server = new ServerSocket(portLocal)) {
-            System.out.println("🚀 Serveur démarré sur le port " + portLocal);
+            System.out.println("Serveur démarré sur le port " + portLocal);
             while (true) {
                 Socket s = server.accept();
                 new Thread(() -> monServeur.gererClient(s)).start();
