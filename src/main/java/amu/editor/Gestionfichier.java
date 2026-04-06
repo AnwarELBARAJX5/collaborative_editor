@@ -87,7 +87,7 @@ public  class Gestionfichier {
         if(!java.nio.file.Files.exists(file)){
             java.nio.file.Files.createDirectories(file);
         }
-        java.nio.file.Path fichier=file.resolve(file);
+        java.nio.file.Path fichier=file.resolve(fileName);
         java.nio.file.Files.write(fichier,lignes);
 
     }catch(IOException e){

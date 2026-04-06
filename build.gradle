@@ -64,7 +64,7 @@ task killOldServers {
     group = 'application'
     description = 'Ferme les anciennes fenêtres des serveurs'
     doLast {
-        println "🧹 Nettoyage des anciens serveurs..."
+        println "Nettoyage des anciens serveurs..."
         try {
             "cmd /c taskkill /F /T /FI \"WINDOWTITLE eq Serveur*\"".execute().waitFor()
             "cmd /c taskkill /F /T /FI \"WINDOWTITLE eq ServerDispatch*\"".execute().waitFor()
